@@ -107,8 +107,32 @@ main(int ac, char *av[])
             continue;
         }
 
-        esh_command_line_print(cline);
+        esh_command_line_execute(cline);
         esh_command_line_free(cline);
     }
     return 0;
+}
+
+void esh_command_line_execute(struck esh_command_line *cmdline) {
+
+	struct list_elem *e = list_begin(&cmdline->pipes);
+
+	for(; e != list_end (&cmdline->pipes); e= list_next (e)) {
+
+		struct esh_pipeline *pipe = list_entry(e, struct esh_pipeline, elem);
+
+		esh_pipeline_execute(pipe);
+	}
+
+}
+
+void esh_pipeline_execute(struct esh_pipeline *pipe) {
+
+	int i = 1;
+	struct list_elem * e = list_begin (&pipe->commands);
+
+	for (; e != list_prevlist_end (&pipe->commands); e = list_next (e)) {
+
+		exelist _entry(e, struct esh_command, elem);
+	}
 }
