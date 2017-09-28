@@ -131,8 +131,81 @@ void esh_pipeline_execute(struct esh_pipeline *pipe) {
 	int i = 1;
 	struct list_elem * e = list_begin (&pipe->commands);
 
-	for (; e != list_prevlist_end (&pipe->commands); e = list_next (e)) {
+	int pipe_ends1[2];
+	if (pipe(pipe_ends1) < 0)
+		perror("pipe"), exit(-1);
 
-		exelist _entry(e, struct esh_command, elem);
+	int pipe_ends2[2];
+	if (pipe(pipe_ends2) < 0)
+		perror("pipe"), exit(-1);
+
+	int pid = fork();
+	if (pid < 0)
+		perror("fork"), exit(-1);
+	
+	if(pid == 0) {
+
+		printf("Starting: %s\n", list_entry(e, struct esh_command, elem);
+
+		if (e == list_end (&pipe->commands) { //holds one command
+
+			dup2(pipe_ends1[1], 1);
+			close(pipe_ends1[1]);
+			close(pipe_ends1[0]);
+			close(pipe_ends2[0]);
+			close(pipe_ends2[1]);
+		}
+		else { //holds more than one command
+			dup2(pipe_ends1[1], 1);
+			close(pipe_ends1[1]);
+			dup2(pipe_ends2[0], 0);
+			close(pipe_ends1[0]);
+			close(pipe_ends2[0]);
+			close(pipe_ends2[1]);
+		}
+
+		char* arry[2] = {list_entry(e, struct esh_command, elem), NULL};
+
+		execvp(list_entry(e, struct esh_command, elem), arry);
+
 	}
+	else {
+	
+		for (; e != list_end (&pipe->commands); e = list_next (e)) {
+	
+			if(pid != 0) {
+				pid = fork();
+				if (pid < 0)
+					perror("fork"), exit(0);
+			}
+
+			if(pid == 0) {
+	
+	                        printf("Starting: %s\n", argv[2]);
+	
+				dup2(pipe_ends1[0], 0);
+				close(pipe_ends1[0]);
+				dup2(pipe_ends2[1], 1);
+				close(pipe_ends1[1]);
+				close(pipe_ends2[0]);
+				close(pipe_ends2[1]);
+		
+				execvp(list _entry(e, struct esh_command, elem), argv);
+			}
+		}
+		if (pid != 0) {
+
+			close(pipe_ends1[0]);
+			close(pipe_ends1[1]);
+			close(pipe_ends2[0]);
+			close(pipe_ends2[1]);
+			wait(NULL);
+			wait(NULL);
+		}
+
+		exit(0);
+	}
+
+
+
 }
