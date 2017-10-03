@@ -10,6 +10,9 @@
 
 #include "esh.h"
 
+static void esh_command_line_execute(struct esh_command_line *cmdline);
+static void esh_pipeline_execute(struct esh_pipeline *pipe);
+
 static void
 usage(char *progname)
 {
@@ -107,17 +110,18 @@ main(int ac, char *av[])
             continue;
         }
 
+	esh_command_line_print(cline);
         esh_command_line_execute(cline);
         esh_command_line_free(cline);
     }
     return 0;
 }
 
-void esh_command_line_execute(struck esh_command_line *cmdline) {
+static void esh_command_line_execute(struct esh_command_line *cmdline) {
 
-	struct list_elem *e = list_begin(&cmdline->pipes);
+	struct list_elem *e = list_begin(&line->pipes);
 
-	for(; e != list_end (&cmdline->pipes); e= list_next (e)) {
+	for(; e != list_end (&line->pipes); e= list_next (e)) {
 
 		struct esh_pipeline *pipe = list_entry(e, struct esh_pipeline, elem);
 
@@ -126,18 +130,9 @@ void esh_command_line_execute(struck esh_command_line *cmdline) {
 
 }
 
-void esh_pipeline_execute(struct esh_pipeline *pipe) {
+static void esh_pipeline_execute(struct esh_pipeline *pipe) {
 
-	int i = 1;
 	struct list_elem * e = list_begin (&pipe->commands);
-
-	int pipe_ends1[2];
-	if (pipe(pipe_ends1) < 0)
-		perror("pipe"), exit(-1);
-
-	int pipe_ends2[2];
-	if (pipe(pipe_ends2) < 0)
-		perror("pipe"), exit(-1);
 
 	int pid = fork();
 	if (pid < 0)
@@ -145,67 +140,15 @@ void esh_pipeline_execute(struct esh_pipeline *pipe) {
 	
 	if(pid == 0) {
 
-		printf("Starting: %s\n", list_entry(e, struct esh_command, elem);
+		char **cmdln = list_entry(e, struct esh_command, elem)->argv;
 
-		if (e == list_end (&pipe->commands) { //holds one command
-
-			dup2(pipe_ends1[1], 1);
-			close(pipe_ends1[1]);
-			close(pipe_ends1[0]);
-			close(pipe_ends2[0]);
-			close(pipe_ends2[1]);
-		}
-		else { //holds more than one command
-			dup2(pipe_ends1[1], 1);
-			close(pipe_ends1[1]);
-			dup2(pipe_ends2[0], 0);
-			close(pipe_ends1[0]);
-			close(pipe_ends2[0]);
-			close(pipe_ends2[1]);
-		}
-
-		char* arry[2] = {list_entry(e, struct esh_command, elem), NULL};
-
-		execvp(list_entry(e, struct esh_command, elem), arry);
-
+		execvp(cmdln[0], cmdln);
 	}
 	else {
-	
-		for (; e != list_end (&pipe->commands); e = list_next (e)) {
-	
-			if(pid != 0) {
-				pid = fork();
-				if (pid < 0)
-					perror("fork"), exit(0);
-			}
 
-			if(pid == 0) {
-	
-	                        printf("Starting: %s\n", argv[2]);
-	
-				dup2(pipe_ends1[0], 0);
-				close(pipe_ends1[0]);
-				dup2(pipe_ends2[1], 1);
-				close(pipe_ends1[1]);
-				close(pipe_ends2[0]);
-				close(pipe_ends2[1]);
-		
-				execvp(list _entry(e, struct esh_command, elem), argv);
-			}
-		}
-		if (pid != 0) {
-
-			close(pipe_ends1[0]);
-			close(pipe_ends1[1]);
-			close(pipe_ends2[0]);
-			close(pipe_ends2[1]);
-			wait(NULL);
-			wait(NULL);
-		}
-
-		exit(0);
+		wait(NULL);
 	}
-
-
-
+	
+	exit(0);
 }
+
