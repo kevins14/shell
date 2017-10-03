@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <readline/readline.h>
 #include <unistd.h>
-
+#include <sys/wait.h>
 #include "esh.h"
 
 static void esh_command_line_execute(struct esh_command_line *cmdline);
@@ -119,9 +119,9 @@ main(int ac, char *av[])
 
 static void esh_command_line_execute(struct esh_command_line *cmdline) {
 
-	struct list_elem *e = list_begin(&line->pipes);
+	struct list_elem *e = list_begin(&cmdline->pipes);
 
-	for(; e != list_end (&line->pipes); e= list_next (e)) {
+	for(; e != list_end (&cmdline->pipes); e= list_next (e)) {
 
 		struct esh_pipeline *pipe = list_entry(e, struct esh_pipeline, elem);
 
