@@ -5,7 +5,7 @@
 #include <obstack.h>
 #include <stdlib.h>
 #include <termios.h>
-#include "list.h"
+#include "esh.h"
 
 void esh_built_in_commands(struct esh_pipeline *pipe);
 
